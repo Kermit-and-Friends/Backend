@@ -1,0 +1,59 @@
+import base64
+import os
+
+from flask import Flask, make_response, request
+from flask_socketio import SocketIO, emit
+from flask_cors import CORS
+from image_processing import readAndSaveImg
+import eventlet
+import random
+eventlet.monkey_patch()
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', 'https://www.piesocket.com'], logger=True, async_moe = "event" )
+
+
+for filename in os.listdir("./img"):
+    filepath = os.path.join(f"./img", filename)
+    if filepath.endswith(".png"):
+        os.remove(filepath)
+@app.route('/', methods=['POST', 'GET'])
+
+@app.route('/')
+def hello():
+    return "<h1> This is the server for Kermit and Friends </h1>"
+
+# @socketio.on('catch-frame')
+# def catch_frame(data):
+#
+#     emit('response_back', data)
+alphabets = ["a", "b", "c", "d", "e", "f",
+             "g", "h", "i", "j", "k", "l",
+             "m", "n", "o", "p", "q", "r",
+             "s", "t", "u", "v", "h", "i",
+             "j", "k", "l", "m", "n", "o",
+             "p", "q", "r", "s", "t", "u",
+             "v", "w", "x", "y", "z", "1",
+             "2", "3", "4", "5", "6", "7",
+             "8", "9", " "]
+@socketio.on('image')
+def image(data_image):
+    index = random.randint(0, len(alphabets))
+    readAndSaveImg(data_image)
+    emit('response_back', [alphabets[index]])
+
+
+
+
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+def _corsify_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
+if __name__ == '__main__':
+    socketio.run(app,port=9990 ,debug=True)
