@@ -3,13 +3,13 @@ import os
 
 from flask import Flask, make_response, request
 from flask_socketio import SocketIO, emit
-# from image_processing import readAndSaveImg, testFunction
+from image_processing import readAndSaveImg, testFunction, predict_img
 import eventlet
 import random
 from autocorrect import Speller
 eventlet.monkey_patch()
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', "chrome-extension://mleadkkdgapcioolkpimeiccednbphio", "http://localhost:3000", 'https://www.piesocket.com',"chrome-extension://hlbdchfgfampdligmnnhgbdocgaibdaj"], logger=True, async_moe = "event" )
+socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', "chrome-extension://cfmenmpmkpiapohhinoimefaeaengilk", "chrome-extension://mleadkkdgapcioolkpimeiccednbphio", "http://localhost:3000", 'https://www.piesocket.com',"chrome-extension://hlbdchfgfampdligmnnhgbdocgaibdaj"], logger=True, async_moe = "event" )
 
 
 for filename in os.listdir("./img"):
@@ -37,15 +37,20 @@ alphabets = ["a", "b", "c", "d", "e", "f",
              "8", "9", " "]
 sentence = "Toay i wetn to the market and i hd a quason it was graet"
 letters = [char for char in sentence]
+strSentence = ""
 
 @socketio.on('image')
 def image(data_image):
-
-    # readAndSaveImg(data_image)
-    emit('response_back', [letters[0]])
-    letters.pop(0)
-    # prediction = testFunction()
-    # emit()
+    global strSentence
+    imgFileName = readAndSaveImg(data_image)
+    # emit('response_back', [letters[0]])
+    # letters.pop(0)
+    prediction = testFunction(imgFileName)
+    if prediction != " ":
+        strSentence += prediction
+    print(prediction)
+    autocorrect(strSentence)
+    emit('response_back', [prediction])
 
 @socketio.on('text')
 def autocorrect(text_data):
@@ -54,9 +59,6 @@ def autocorrect(text_data):
     print(text_data)
     print(corrected)
     emit('autocorrected', [corrected])
-
-
-
 
 def _build_cors_preflight_response():
     response = make_response()
