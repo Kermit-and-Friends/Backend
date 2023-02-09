@@ -3,13 +3,12 @@ import os
 
 from flask import Flask, make_response, request
 from flask_socketio import SocketIO, emit
-from flask_cors import CORS
-from image_processing import readAndSaveImg
+from image_processing import readAndSaveImg, testFunction
 import eventlet
 import random
 eventlet.monkey_patch()
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', 'https://www.piesocket.com'], logger=True, async_moe = "event" )
+socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', 'https://www.piesocket.com',"chrome-extension://hlbdchfgfampdligmnnhgbdocgaibdaj"], logger=True, async_moe = "event" )
 
 
 for filename in os.listdir("./img"):
@@ -39,7 +38,8 @@ alphabets = ["a", "b", "c", "d", "e", "f",
 def image(data_image):
     index = random.randint(0, len(alphabets))
     readAndSaveImg(data_image)
-    emit('response_back', [alphabets[index]])
+    # emit('response_back', [alphabets[index]])
+    testFunction()
 
 
 
@@ -56,4 +56,5 @@ def _corsify_actual_response(response):
     return response
 
 if __name__ == '__main__':
-    socketio.run(app,port=9990 ,debug=True)
+    # app.run()
+    socketio.run(app,host="127.0.0.1",port=9990 ,debug=True)
