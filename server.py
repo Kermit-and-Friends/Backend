@@ -6,6 +6,7 @@ from flask_socketio import SocketIO, emit
 from image_processing import readAndSaveImg, testFunction
 import eventlet
 import random
+from autocorrect import Speller
 eventlet.monkey_patch()
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', 'https://www.piesocket.com',"chrome-extension://hlbdchfgfampdligmnnhgbdocgaibdaj"], logger=True, async_moe = "event" )
@@ -34,12 +35,22 @@ alphabets = ["a", "b", "c", "d", "e", "f",
              "v", "w", "x", "y", "z", "1",
              "2", "3", "4", "5", "6", "7",
              "8", "9", " "]
+
+full_prediction = ""
 @socketio.on('image')
 def image(data_image):
+    global full_prediction
     index = random.randint(0, len(alphabets))
     readAndSaveImg(data_image)
     # emit('response_back', [alphabets[index]])
-    testFunction()
+    # prediction = testFunction()
+    # emit()
+
+@socketio.on('text')
+def autocorrect(text_data):
+    spell = Speller()
+    corrected = spell(text_data)
+    emit('autocorrected', [corrected])
 
 
 

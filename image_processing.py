@@ -115,8 +115,10 @@ def predict_img(data_image):
     high1 = predarrayordered[0]
     high2 = predarrayordered[1]
     high3 = predarrayordered[2]
+    result = None
     for key, value in letter_prediction_dict.items():
         if value == high1:
+            result = key
             print("Predicted Character 1: ", key)
             print('Confidence 1: ', 100 * value)
         elif value == high2:
@@ -152,6 +154,6 @@ def predict_img(data_image):
     cv2.imshow("Frame", data_image)
 
     cv2.destroyAllWindows()
-
+    return key
 if __name__ == '__main__':
     testFunction()
