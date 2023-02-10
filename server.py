@@ -7,6 +7,7 @@ from flask_socketio import SocketIO, emit
 from image_processing import readAndSaveImg, testFunction, predict_img
 import eventlet
 import random
+import constants
 from autocorrect import Speller
 eventlet.monkey_patch()
 app = Flask(__name__)
@@ -36,7 +37,7 @@ alphabets = ["a", "b", "c", "d", "e", "f",
              "v", "w", "x", "y", "z", "1",
              "2", "3", "4", "5", "6", "7",
              "8", "9", " "]
-sentence = "Toay i wetn to the market and i hd a quason it was graet"
+sentence = constants.sample1
 letters = [char for char in sentence]
 strSentence = ""
 
@@ -45,14 +46,13 @@ strSentence = ""
 def image(data_image):
     global strSentence
     imgFileName = readAndSaveImg(data_image)
-    # emit('response_back', [letters[0]])
-    # letters.pop(0)
     prediction = testFunction(imgFileName)
     if prediction != " ":
         strSentence += prediction
-    print(prediction)
     autocorrect(strSentence)
-    emit('response_back', [prediction])
+    # emit('response_back', [prediction])
+    emit('response_back', [letters[0]])
+    letters.pop(0)
 
 @socketio.on('text')
 @cross_origin()
