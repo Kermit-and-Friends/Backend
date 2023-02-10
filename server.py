@@ -2,7 +2,6 @@ import base64
 import os
 import socket
 from flask import Flask, make_response, request
-from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from image_processing import readAndSaveImg, testFunction, predict_img
 import eventlet
@@ -42,20 +41,21 @@ letters = [char for char in sentence]
 strSentence = ""
 
 @socketio.on('image')
-@cross_origin()
 def image(data_image):
     global strSentence
+    global letters
     imgFileName = readAndSaveImg(data_image)
-    prediction = testFunction(imgFileName)
-    if prediction != " ":
-        strSentence += prediction
-    autocorrect(strSentence)
+    # prediction = testFunction(imgFileName)
+    # if prediction != " ":
+    #     strSentence += prediction
+    # autocorrect(strSentence)
     # emit('response_back', [prediction])
+    if len(letters) == 0:
+        letters = [char for char in sentence]
     emit('response_back', [letters[0]])
     letters.pop(0)
 
 @socketio.on('text')
-@cross_origin()
 def autocorrect(text_data):
     spell = Speller()
     corrected = spell(text_data)
