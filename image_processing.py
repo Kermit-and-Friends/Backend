@@ -33,42 +33,32 @@ def readAndSaveImg(data_image):
     next_filename = f"./img/{len(dir_list)}.png"
     with open(next_filename, "wb") as f:
         f.write(img)
-    # Using cv2.imread() method
-    # img = cv2.imread(next_filename)
-    # predict_img(img)
     return next_filename
-def testFunction(filename):
-    # dir_list = os.listdir("./img")
-    # length = len(dir_list) - 1
-    # for x in range(1, length):
-    #     next_filename = f"./img/{x}.png"
-    img = cv2.imread(filename)
-    return predict_img(img)
 
-def predict_img(data_image):
+def predict_img(filename):
+    img = cv2.imread(filename)
     model = load_model('smnist.h5')
 
     mphands = mp.solutions.hands
     hands = mphands.Hands()
 
-    h, w, c = data_image.shape
+    height, width, c = img.shape
 
-    letterpred = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+    PredictionLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
                   'V', 'W', 'X', 'Y']
 
-    analysisframe = data_image
-    #cv2.imshow("Frame", data_image)
-    framergbanalysis = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2RGB)
-    resultanalysis = hands.process(framergbanalysis)
-    hand_landmarksanalysis = resultanalysis.multi_hand_landmarks
-    if hand_landmarksanalysis:
-        for handLMsanalysis in hand_landmarksanalysis:
+    FrameToBeAnalysed = img
+    FrameRGBToBeAnalysed = cv2.cvtColor(FrameToBeAnalysed, cv2.COLOR_BGR2RGB)
+    ResultOfAnalysis = hands.process(FrameRGBToBeAnalysed)
+    HandAnalysis = ResultOfAnalysis.multi_hand_landmarks
+    if HandAnalysis:
+        for HandLandMarkAnalysis in HandAnalysis:
             x_max = 0
             y_max = 0
-            x_min = w
-            y_min = h
-            for lmanalysis in handLMsanalysis.landmark:
-                x, y = int(lmanalysis.x * w), int(lmanalysis.y * h)
+            x_min = width
+            y_min = height
+            for LandMarkAnalysis in HandLandMarkAnalysis.landmark:
+                x, y = int(LandMarkAnalysis.x * width), int(LandMarkAnalysis.y * height)
                 if x > x_max:
                     x_max = x
                 if x < x_min:
@@ -85,18 +75,18 @@ def predict_img(data_image):
         print("Hands not found")
         return " "
 
-    analysisframe = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2GRAY)
-    analysisframe = analysisframe[y_min:y_max, x_min:x_max]
+    FrameToBeAnalysed = cv2.cvtColor(FrameToBeAnalysed, cv2.COLOR_BGR2GRAY)
+    FrameToBeAnalysed = FrameToBeAnalysed[y_min:y_max, x_min:x_max]
     try:
-        analysisframe = cv2.resize(analysisframe, (28, 28))
+        FrameToBeAnalysed = cv2.resize(FrameToBeAnalysed, (28, 28))
     except:
         return " "
 
     nlist = []
-    rows, cols = analysisframe.shape
+    rows, cols = FrameToBeAnalysed.shape
     for i in range(rows):
         for j in range(cols):
-            k = analysisframe[i, j]
+            k = FrameToBeAnalysed[i, j]
             nlist.append(k)
 
     datan = pd.DataFrame(nlist).T
@@ -105,39 +95,29 @@ def predict_img(data_image):
         colname.append(val)
     datan.columns = colname
 
-    pixeldata = datan.values
-    pixeldata = pixeldata / 255
-    pixeldata = pixeldata.reshape(-1, 28, 28, 1)
-    prediction = model.predict(pixeldata)
-    predarray = np.array(prediction[0])
-    letter_prediction_dict = {letterpred[i]: predarray[i] for i in range(len(letterpred))}
-    predarrayordered = sorted(predarray, reverse=True)
-    high1 = predarrayordered[0]
-    high2 = predarrayordered[1]
-    high3 = predarrayordered[2]
+    PixelData = datan.values
+    PixelData = PixelData / 255
+    PixelData = PixelData.reshape(-1, 28, 28, 1)
+    PredictionFromModel = model.predict(PixelData)
+    PredictionArray = np.array(PredictionFromModel[0])
+    LetterPredictionDictionary = {PredictionLetters[i]: PredictionArray[i] for i in range(len(PredictionLetters))}
+    SortedPredictionArray = sorted(PredictionArray, reverse=True)
+    high1 = SortedPredictionArray[0]
     LetterPrediction = None
-    for key, value in letter_prediction_dict.items():
+    for key, value in LetterPredictionDictionary.items():
         if value == high1:
             LetterPrediction = key
-        #     print("Predicted Character 1: ", key)
-        #     print('Confidence 1: ', 100 * value)
-        # elif value == high2:
-        #     print("Predicted Character 2: ", key)
-        #     print('Confidence 2: ', 100 * value)
-        # elif value == high3:
-        #     print("Predicted Character 3: ", key)
-        #     print('Confidence 3: ', 100 * value)
-    framergb = cv2.cvtColor(data_image, cv2.COLOR_BGR2RGB)
-    result = hands.process(framergb)
-    hand_landmarks = result.multi_hand_landmarks
-    if hand_landmarks:
-        for handLMs in hand_landmarks:
+    FrameRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    result = hands.process(FrameRGB)
+    HandLandMark = result.multi_hand_landmarks
+    if HandLandMark:
+        for HandLandMark2 in HandLandMark:
             x_max = 0
             y_max = 0
-            x_min = w
-            y_min = h
-            for lm in handLMs.landmark:
-                x, y = int(lm.x * w), int(lm.y * h)
+            x_min = width
+            y_min = height
+            for lm in HandLandMark2.landmark:
+                x, y = int(lm.x * width), int(lm.y * height)
                 if x > x_max:
                     x_max = x
                 if x < x_min:
@@ -150,11 +130,7 @@ def predict_img(data_image):
             y_max += 20
             x_min -= 20
             x_max += 20
-            cv2.rectangle(data_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-    # cv2.imshow("Frame", data_image)
+            cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
     cv2.destroyAllWindows()
     return LetterPrediction
-
-if __name__ == '__main__':
-    testFunction()

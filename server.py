@@ -3,7 +3,7 @@ import os
 import socket
 from flask import Flask, make_response, request
 from flask_socketio import SocketIO, emit
-from image_processing import readAndSaveImg, testFunction, predict_img
+from image_processing import readAndSaveImg, predict_img
 import eventlet
 import random
 import constants
@@ -45,10 +45,11 @@ def image(data_image):
     global strSentence
     global letters
     imgFileName = readAndSaveImg(data_image)
-    # prediction = testFunction(imgFileName)
+    prediction = predict_img(imgFileName)
     # if prediction != " ":
     #     strSentence += prediction
     # autocorrect(strSentence)
+
     # emit('response_back', [prediction])
     if len(letters) == 0:
         letters = [char for char in sentence]
