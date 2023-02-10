@@ -4,7 +4,7 @@ import socket
 from flask import Flask, make_response, request
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
-from image_processing import readAndSaveImg, testFunction, predict_img
+from image_processing import readAndSaveImg, predict_img
 import eventlet
 import random
 import constants
@@ -46,7 +46,7 @@ strSentence = ""
 def image(data_image):
     global strSentence
     imgFileName = readAndSaveImg(data_image)
-    prediction = testFunction(imgFileName)
+    prediction = predict_img(imgFileName)
     if prediction != " ":
         strSentence += prediction
     autocorrect(strSentence)

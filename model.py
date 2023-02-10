@@ -9,27 +9,27 @@ from sklearn.metrics import classification_report,confusion_matrix
 from sklearn.preprocessing import LabelBinarizer
 import pandas as pd
 
-train_df = pd.read_csv("sign_mnist_train.csv")
-test_df = pd.read_csv("sign_mnist_test.csv")
+Training = pd.read_csv("sign_mnist_train.csv")
+Testing = pd.read_csv("sign_mnist_test.csv")
 
-y_train = train_df['label']
-y_test = test_df['label']
-del train_df['label']
-del test_df['label']
+yAxisTraining = Training['label']
+yAxisTesting = Testing['label']
+del Training['label']
+del Testing['label']
 
 
-label_binarizer = LabelBinarizer()
-y_train = label_binarizer.fit_transform(y_train)
-y_test = label_binarizer.fit_transform(y_test)
+LabelBinarizer = LabelBinarizer()
+yAxisTraining = LabelBinarizer.fit_transform(yAxisTraining)
+yAxisTesting = LabelBinarizer.fit_transform(yAxisTesting)
 
-x_train = train_df.values
-x_test = test_df.values
+xAxisTraining = Training.values
+xAxisTesting = Testing.values
 
-x_train = x_train / 255
-x_test = x_test / 255
+xAxisTraining = xAxisTraining / 255
+xAxisTesting = xAxisTesting / 255
 
-x_train = x_train.reshape(-1,28,28,1)
-x_test = x_test.reshape(-1,28,28,1)
+xAxisTraining = xAxisTraining.reshape(-1,28,28,1)
+xAxisTesting = xAxisTesting.reshape(-1,28,28,1)
 
 datagen = ImageDataGenerator(
         featurewise_center=False,
@@ -44,7 +44,7 @@ datagen = ImageDataGenerator(
         horizontal_flip=False,
         vertical_flip=False)
 
-datagen.fit(x_train)
+datagen.fit(xAxisTraining)
 
 
 model = Sequential()
@@ -66,6 +66,7 @@ model.add(Dense(units = 24 , activation = 'softmax'))
 model.compile(optimizer = 'adam' , loss = 'categorical_crossentropy' , metrics = ['accuracy'])
 model.summary()
 
-history = model.fit(datagen.flow(x_train,y_train, batch_size = 128) ,epochs = 20 , validation_data = (x_test, y_test))
+history = model.fit(datagen.flow(xAxisTraining,yAxisTraining, batch_size = 128) ,epochs = 20 , validation_data
+= (xAxisTraining, yAxisTraining))
 
 model.save('smnist.h5')
