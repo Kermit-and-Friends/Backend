@@ -1,12 +1,9 @@
-import base64
 import os
 import socket
 from flask import Flask, make_response, request
 from flask_socketio import SocketIO, emit
 from image_processing import readAndSaveImg, predict_img
 import eventlet
-import random
-import constants
 from autocorrect import Speller
 eventlet.monkey_patch()
 app = Flask(__name__)
@@ -23,21 +20,6 @@ for filename in os.listdir("./img"):
 def hello():
     return "<h1> This is the server for Kermit and Friends </h1>"
 
-# @socketio.on('catch-frame')
-# def catch_frame(data):
-#
-#     emit('response_back', data)
-alphabets = ["a", "b", "c", "d", "e", "f",
-             "g", "h", "i", "j", "k", "l",
-             "m", "n", "o", "p", "q", "r",
-             "s", "t", "u", "v", "h", "i",
-             "j", "k", "l", "m", "n", "o",
-             "p", "q", "r", "s", "t", "u",
-             "v", "w", "x", "y", "z", "1",
-             "2", "3", "4", "5", "6", "7",
-             "8", "9", " "]
-sentence = constants.sample1
-letters = [char for char in sentence]
 strSentence = ""
 
 @socketio.on('image')
@@ -46,22 +28,14 @@ def image(data_image):
     global letters
     imgFileName = readAndSaveImg(data_image)
     prediction = predict_img(imgFileName)
-    # if prediction != " ":
-    #     strSentence += prediction
-    # autocorrect(strSentence)
-
-    # emit('response_back', [prediction])
-    if len(letters) == 0:
-        letters = [char for char in sentence]
-    emit('response_back', [letters[0]])
-    letters.pop(0)
+    if prediction != " ":
+         strSentence += prediction
+    emit('response_back', [prediction])
 
 @socketio.on('text')
 def autocorrect(text_data):
     spell = Speller()
     corrected = spell(text_data)
-    print(text_data)
-    print(corrected)
     emit('autocorrected', [corrected])
 
 def _build_cors_preflight_response():
@@ -76,7 +50,5 @@ def _corsify_actual_response(response):
     return response
 
 if __name__ == '__main__':
-    # app.run()
     ip = socket.gethostbyname("localhost")
-    print(ip)
     socketio.run(app,host=ip,port=9990 ,debug=True)
