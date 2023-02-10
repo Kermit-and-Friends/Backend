@@ -1,7 +1,8 @@
 import base64
 import os
-
+import socket
 from flask import Flask, make_response, request
+from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 # from image_processing import readAndSaveImg, testFunction
 import eventlet
@@ -9,8 +10,7 @@ import random
 from autocorrect import Speller
 eventlet.monkey_patch()
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=['http://localhost:63342', "chrome-extension://mleadkkdgapcioolkpimeiccednbphio", "http://localhost:3000", 'https://www.piesocket.com',"chrome-extension://hlbdchfgfampdligmnnhgbdocgaibdaj"], logger=True, async_moe = "event" )
-
+socketio = SocketIO(app, cors_allowed_origins='*', logger=True, async_moe = "event" )
 
 for filename in os.listdir("./img"):
     filepath = os.path.join(f"./img", filename)
@@ -39,8 +39,9 @@ sentence = "Toay i wetn to the market and i hd a quason it was graet"
 letters = [char for char in sentence]
 
 @socketio.on('image')
+@cross_origin()
 def image(data_image):
-
+    print(data_image)
     # readAndSaveImg(data_image)
     emit('response_back', [letters[0]])
     letters.pop(0)
@@ -48,6 +49,7 @@ def image(data_image):
     # emit()
 
 @socketio.on('text')
+@cross_origin()
 def autocorrect(text_data):
     spell = Speller()
     corrected = spell(text_data)
@@ -71,4 +73,6 @@ def _corsify_actual_response(response):
 
 if __name__ == '__main__':
     # app.run()
-    socketio.run(app,host="127.0.0.1",port=9990 ,debug=True)
+    ip = socket.gethostbyname("localhost")
+    print(ip)
+    socketio.run(app,host=ip,port=9990 ,debug=True)
