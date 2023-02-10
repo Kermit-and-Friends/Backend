@@ -36,14 +36,14 @@ def readAndSaveImg(data_image):
     # Using cv2.imread() method
     # img = cv2.imread(next_filename)
     # predict_img(img)
-
-def testFunction():
-    dir_list = os.listdir("./img")
-    length = len(dir_list) - 1
-    for x in range(1, length):
-        next_filename = f"./img/{x}.png"
-        img = cv2.imread(next_filename)
-        predict_img(img)
+    return next_filename
+def testFunction(filename):
+    # dir_list = os.listdir("./img")
+    # length = len(dir_list) - 1
+    # for x in range(1, length):
+    #     next_filename = f"./img/{x}.png"
+    img = cv2.imread(filename)
+    return predict_img(img)
 
 def predict_img(data_image):
     model = load_model('smnist.h5')
@@ -57,7 +57,7 @@ def predict_img(data_image):
                   'V', 'W', 'X', 'Y']
 
     analysisframe = data_image
-    cv2.imshow("Frame", data_image)
+    #cv2.imshow("Frame", data_image)
     framergbanalysis = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2RGB)
     resultanalysis = hands.process(framergbanalysis)
     hand_landmarksanalysis = resultanalysis.multi_hand_landmarks
@@ -83,14 +83,14 @@ def predict_img(data_image):
             x_max += 20
     else:
         print("Hands not found")
-        return
+        return " "
 
     analysisframe = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2GRAY)
     analysisframe = analysisframe[y_min:y_max, x_min:x_max]
     try:
         analysisframe = cv2.resize(analysisframe, (28, 28))
     except:
-        return
+        return " "
 
     nlist = []
     rows, cols = analysisframe.shape
@@ -115,18 +115,18 @@ def predict_img(data_image):
     high1 = predarrayordered[0]
     high2 = predarrayordered[1]
     high3 = predarrayordered[2]
-    result = None
+    LetterPrediction = None
     for key, value in letter_prediction_dict.items():
         if value == high1:
-            result = key
-            print("Predicted Character 1: ", key)
-            print('Confidence 1: ', 100 * value)
-        elif value == high2:
-            print("Predicted Character 2: ", key)
-            print('Confidence 2: ', 100 * value)
-        elif value == high3:
-            print("Predicted Character 3: ", key)
-            print('Confidence 3: ', 100 * value)
+            LetterPrediction = key
+        #     print("Predicted Character 1: ", key)
+        #     print('Confidence 1: ', 100 * value)
+        # elif value == high2:
+        #     print("Predicted Character 2: ", key)
+        #     print('Confidence 2: ', 100 * value)
+        # elif value == high3:
+        #     print("Predicted Character 3: ", key)
+        #     print('Confidence 3: ', 100 * value)
     framergb = cv2.cvtColor(data_image, cv2.COLOR_BGR2RGB)
     result = hands.process(framergb)
     hand_landmarks = result.multi_hand_landmarks
@@ -151,9 +151,10 @@ def predict_img(data_image):
             x_min -= 20
             x_max += 20
             cv2.rectangle(data_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-    cv2.imshow("Frame", data_image)
+    # cv2.imshow("Frame", data_image)
 
     cv2.destroyAllWindows()
-    return key
+    return LetterPrediction
+
 if __name__ == '__main__':
     testFunction()
